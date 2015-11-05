@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>赛车游戏H5-基于lufylegend引擎</title>
+    <meta name="keywords" content="H5赛车游戏 lufylegend"/>
+    <meta name="description" content=" "/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="pragma" Content="no-cache" />
+    <meta name="robots" content="all" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta name="format-detection" content="telephone=no"/>
+    <link rel="stylesheet" href="css/game.css"/>
+</head>
+<body style="padding: 0; margin: 0; background:red">
+
+<div style="position:absolute;width:100%; height:100%;">
+    <div id="mylegend"></div>
+</div>
+
+
+<script type="text/javascript" src="js/zepto.min.js"></script>
+<script type="text/javascript" src="js/lufylegend.min.1.9.10.js"></script>
+<script type="text/javascript">
+
+    LGlobal.aspectRatio = PORTRAIT;//转屏
+    if(LGlobal.canTouch){LGlobal.stageScale = LStageScaleMode.EXACT_FIT;LSystem.screen(LStage.FULL_SCREEN);}//全屏
+
+    var loadLayer,hintLayer,gameLayer,endLayer;//定义游戏图层
+    //定义初始变量
+    var point=0,time=30,load=0;
+    var d_width=640,d_height=1134;
+    var gamebg,gamebg2,car,truck,endbox,btnagain,bitmaup,bitmaover;
+    var loadtxt,score,scorenum= 0;
+    var state="start";
+    var speed=startspeed=20;//移动速度
+    var tiltLR;//左右感应
+    var imglist = [];//加载游戏图片
+    var imgData = [
+        {name:"hint",path:"images/hint.png"},
+        {name:"gamebg",path:"images/gamebg.png"},
+        {name:"truck1",path:"images/truck.png"},
+        {name:"truck2",path:"images/truck2.png"},
+        {name:"btn_up",path:"images/btn_up.png"},
+        {name:"btn_over",path:"images/btn_over.png"},
+        {name:"car",path:"images/car.png"}
+    ];
+
+    //初始化引擎
+    init(50,"mylegend",d_width,d_height,main);
+
+    //游戏主程序
+    function main(){
+        //初始化加载层
+        loadLayer= new LSprite();
+        loadLayer.graphics.drawRect(1, "#ddd",[0, 0, d_width, d_height],true,"#ddd");
+        addChild(loadLayer);
+        var loadbg = new LSprite();
+        loadLayer.addChild(loadbg);//进度条底色
+        loadbg.graphics.drawRect(10, "#666", [d_width/4, d_height/2-30, d_width/2, 20], true, "#666");
+        var loadbar = new LSprite();
+        loadLayer.addChild(loadbar);//进度条
+        loadtxt = new LTextField();
+        loadtxt.size = 30;
+        loadtxt.x = d_width/2-35;
+        loadtxt.y = d_height/2;
+        loadtxt.color = "#fff";
+        loadLayer.addChild(loadtxt);
+        function setProgress(a){loadtxt.text = a+"%";loadbar.graphics.drawRect(0, "", [d_width/4, d_height/2-30,(d_width/2-30)*a/100, 18], true, "#fff");}
+
+        //loading游戏资源
+        LLoadManage.load(
+                imgData,
+                function(progress){setProgress(progress);},//绘制进度条
+                function(result){
+                    imglist = result;
+                    removeChild(loadLayer);
+                    hintLayer= new LSprite();
+                    addChild(hintLayer);
+                    var hintbg=new LBitmap(new LBitmapData(imglist["hint"]));
+                    hintLayer.addChild(hintbg);
+                    hintLayer.addEventListener(LMouseEvent.MOUSE_DOWN,start);
+                    function start(event){removeChild(hintLayer);gameStart();}
+                });
+
+    }
+
+    //开始游戏
+    function gameStart(){
+        gameLayer= new LSprite();
+        addChild(gameLayer);
+        addGamebg();addCar();addTruck();addScore();
+        //游戏开始倒计时
+        var m = setInterval(miaos,1000);
+        var nums = 3;
+        var daoshu = new LShape();
+        daoshu.graphics.drawRoundRect(0, "#f44336", [d_width/2-75, d_height/2-75, 150, 150, 75],true,"#f44336");
+        gameLayer.addChild(daoshu);
+        var miaonum=new LTextField();
+        miaonum.color = "#ffffff";miaonum.size = 80;miaonum.x=d_width/2;miaonum.y=d_height/2-45;miaonum.textAlign = "center";miaonum.text=nums;
+        gameLayer.addChild(miaonum);
+        function miaos(){
+            nums--;miaonum.text=nums<1?"GO":nums;
+            if(nums<0){gameLayer.removeChild(daoshu);gameLayer.removeChild(miaonum);addEvent();}
+        }
+    }
+
+    //监听事件
+    function addEvent(){
+        gameLayer.addEventListener(LEvent.ENTER_FRAME,onframe);
+        gameLayer.addEventListener(LMouseEvent.MOUSE_DOWN,onDown);
+        gameLayer.addEventListener(LMouseEvent.MOUSE_UP,onUp);
+        gameLayer.addEventListener(LMouseEvent.MOUSE_MOVE,onDown);
+
+    }
+    function onframe(){if(state=="start"){Run(gamebg);Run(gamebg2);hitTest();animateCar();runTruck();runScore();}}
+    function onUp(){car.mode=""}
+    function onDown(event){if(event.selfX < d_width/2){car.mode="left";}else{car.mode="right";}}
+
+    //增加元件
+    function addGamebg(){
+        gamebg = new LBitmap(new LBitmapData(imglist["gamebg"]));
+        gamebg2 = new LBitmap(new LBitmapData(imglist["gamebg"]));
+        gameLayer.addChild(gamebg);
+        gameLayer.addChild(gamebg2);
+        gamebg.y=0;
+        gamebg2.y=-1200;
+    }
+    function addCar(){
+        car=new LBitmap(new LBitmapData(imglist["car"],0,0,80,177));
+        car.x=d_width/2-39;
+        car.y=d_height-180;
+        gameLayer.addChild(car);
+    }
+    function addTruck(){
+        var temp=Math.floor(Math.random()*2)+1;
+        temp==1?truck=new LBitmap(new LBitmapData(imglist["truck1"],0,0,80,214)):truck=new LBitmap(new LBitmapData(imglist["truck2"],0,0,80,267))
+        truck.x = 30 + Math.floor(Math.random()*(d_width - 110));
+        truck.y = -truck.getHeight();
+        temp==1?truck.s=Math.floor(Math.random()*speed)+speed*3:truck.s=Math.floor(Math.random()*speed)+speed*2;
+        gameLayer.addChild(truck);
+    }
+    function addScore(){
+        score = new LTextField();
+        score.color = "#ffffff";score.size = 40;score.x = 50;score.y = 10;score.font = "微软雅黑";
+        gameLayer.addChild(score);
+    }
+
+    //元件变动
+    function Run(a){if(a.y>1134){a.y-=2400};a.y += speed;}
+    function  animateCar(){if(car.mode=="left"){if(car.x>30){car.x -= speed}}else if(car.mode=="right"){if(car.x<d_width-car.getWidth()-30){car.x += speed}}}
+    function runTruck(){if(truck.y>d_height){ truck.die();addTruck()}else{truck.y+=truck.s;}}
+    function runScore(){scorenum++;speed=startspeed+Math.floor(scorenum/50);score.text="速度："+speed+"                分数："+scorenum;}
+
+
+    //碰撞检测
+    function hitTest(){
+        if(LGlobal.hitTestArc(car,truck)){ state="end";gameEnd()}
+    }
+
+    //游戏结束
+    function gameEnd(){
+        endLayer= new LSprite();
+        addChild(endLayer);
+        endbox = new LShape();
+        endbox.graphics.drawRect(0, "#fff", [d_width/2-200, d_height/2-150, 400, 300], true, "#000");endbox.alpha=0.8;
+        endLayer.addChild(endbox);
+        overtxt = new LTextField();
+        overtxt.color = "#ffffff";overtxt.size = 40;overtxt.text = "Game Over";overtxt.x = d_width/2-overtxt.getWidth()/2;overtxt.y = d_height/2-overtxt.getHeight()/2-100;overtxt.font = "微软雅黑";
+        endLayer.addChild(overtxt);
+        endtxt = new LTextField();
+        endtxt.color = "#ffffff";endtxt.size = 30;endtxt.text = "您的得分："+scorenum;endtxt.x = d_width/2-endtxt.getWidth()/2;endtxt.y = d_height/2-endtxt.getHeight()/2-30;endtxt.font = "微软雅黑";
+        endLayer.addChild(endtxt);
+
+        bitmaup=new LBitmap(new LBitmapData(imglist["btn_up"],0,0,280,80));
+        bitover=new LBitmap(new LBitmapData(imglist["btn_over"],0,0,280,80));
+        btnagain= new LButton(bitmaup,bitover);
+        btnagain.x=d_width/2-btnagain.getWidth()/2;
+        btnagain.y=d_height/2-btnagain.getHeight()/2+60;
+        endLayer.addChild(btnagain);
+        btnagain.addEventListener(LMouseEvent.MOUSE_DOWN,gameagain);
+        function gameagain(){window.location.href="index.html"}
+    }
+</script>
+
+</body>
+</html>
