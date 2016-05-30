@@ -1,0 +1,119 @@
+@charset "utf-8";
+
+body{font-family:\5FAE\8F6F\96C5\9ED1,Arial;width:100%;height:100%;margin:0px;padding:0px;background:#d82015;}
+a:active,a:visited{ color: #fff;}
+.main{ position: absolute; width: 100%; height: 100%; background: url("../images/mg_back.png");background-size: 100% 100%; }
+.resultbg{ background: url("../images/resultbg.png");background-size: 100% 100%;  }
+.toplist{position:absolute; top:15px; left:15px; display: block; border:solid 2px #fff; text-align:center;padding:3px 10px; color:#fff;font-size:14px; text-decoration: none; z-index: 9;}
+.rule{position:absolute; top:15px; right:15px; display: block; border:solid 2px #fff; text-align:center;padding:3px 10px; color:#fff;font-size:14px; text-decoration: none; z-index: 9;}
+.migang{width:100%; height:100%; background:url("../images/mg_load.png") no-repeat 50% 42%; background-size:40% auto;position:absolute; }
+.btnbox{ position: absolute; top:65%; width: 100%; text-align: center; color: #fff;}
+.helpbg{  top:55%; }
+.c-fc0{ color: #fc0;}
+.btn{-webkit-tap-highlight-color:rgba(0,0,0,0); display:block; width:56%;margin:2% auto; color: #fff; text-decoration: none; font-weight: bold;}
+.btn:active{ opacity: 0.8;}
+
+/*弹窗提示*/
+.mask{ background: #000; opacity: 0.7; position: absolute; width: 100%; height: 100%; z-index: 11; display: none;}
+.popbox{ position: absolute; top:0; width: 100%;height: 100%; background: url("../images/mg_share.png") no-repeat center top; background-size: 95% auto; z-index: 12;display: none;}
+
+/*游戏规则*/
+.gamerule{ background: #f44336;}
+.rulebox,.changebox,.successbox,.top_bg{ position:absolute;width:100%;background:url("../images/mg_bg.png") no-repeat;background-size:100% 100%;}
+.rulebox{ z-index: 999; background-size: 100% auto; background-color:#f44336; }
+.rulebox img{ display: block; width: 90%; margin: 30px auto;}
+.back{ display: block; border:solid 2px #fff; text-align:center;padding:6px 10px; color:#fff;font-size:14px; text-decoration: none;  width: 80px; margin: 20px auto}
+
+/*游戏界面*/
+#load{width:244px;height:300px;background:url(../images/mg_load.png) no-repeat center center;position:absolute;left:50%;margin-left:-122px;top:50%;margin-top:-160px;background-size:60%;color:#fff;font-size:1.2em;}
+#counter{position:absolute;left:0em;z-index:2;width:100%;text-align:center;}
+.load-bar {width: 120px;height: 25px;border-radius: 30px;background: #c4382e;position:absolute;bottom: 0px;box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8),  inset 0 2px 3px rgba(0, 0, 0, 0.2);text-align:center;left:50%;margin-left:-60px;}
+.load-bar-inner {
+    height: 99%;
+    width: 0%;
+    border-radius: inherit;
+    position: relative;
+    background: #c2d7ac;
+    background: linear-gradient(#ffd836, #ffd836);
+    background: -moz-linear-gradient(#ffd836, #ffd836);
+    background: -webkit-linear-gradient(#ffd836, #ffd836);
+    background: -o-linear-gradient(#ffd836, #ffd836);
+    box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.3),  0 1px 5px rgba(0, 0, 0, 0.3),  0 4px 5px rgba(0, 0, 0, 0.3);
+    animation: loader 10s linear infinite;
+    -moz-animation: loader 10s linear infinite;
+    -webkit-animation: loader 10s linear infinite;
+    -o-animation: loader 10s linear infinite;
+}
+
+/*游戏成绩页*/
+.friend{ margin: 50px 10% 0; padding: 20px 0 0; border-top: solid 2px #fff; position:relative; }
+.friend li{ list-style: none; padding: 0; margin: 10px 0; font-size: 14px; text-align: left; line-height: 34px; }
+li.f-title{ background:#d82015;width: 120px; position:absolute; top:-28px; left: 50%; margin-left: -60px; font-size: 18px; font-weight: bold; text-align: center}
+.f-name{ width: 30px; height: 30px;  display: inline-block;  margin: 0 5px; border-radius: 30px; overflow: hidden; border: solid 2px #fff; font-weight: bold; float: left;}
+.f-name img{width: 100%;}
+.result{ width:180px; height:62px; margin: 0 auto; line-height: 34px; position: relative;}
+.result .f-name{ position: absolute; left: 0; top:-8px; width: 40px; height: 40px;}
+.result p{ position: absolute; left: 10px; top:-2px; color: #333; font-size: 14px; margin: 0; background: #fff;text-indent:1.8em; width: 75%;  border-radius: 20px; padding: 0 10px;}
+.help{ margin: 10px 0; font-size: 20px;}
+.pmbg{ position:absolute; top:50%; width: 90%; margin: -60% 5% 0; }
+.pmbg img{ width: 100%; }
+.pmbg p{ position: absolute; top: 8%; font-size: 24px; color: #fd3;  width: 44%; left: 6%; text-align: center;}
+.pmbg .f-name{ position: absolute; top:-22px; left: 50%; width: 40px; height: 40px;  margin-left: -22px; border: solid 2px #333;}
+.pmbg p.zpm{ left: auto; right: 6%;}
+.pmbg p.jbnum{  width: 100%; top: 35%; left: 0; font-size: 40px;}
+.pmbg p.jb_help{ top: 35%; left: 12%; font-size: 40px; margin: 0;}
+
+/*兑换页面*/
+.changebox dl{width:80%;border:2px solid #fff;border-radius:1em;margin:2em auto 0 auto;color:#fff;position:relative;padding:1em 0.8em 0.5em;top:0.5em;}
+.changebox dt{width:8em;font-size:20px;color:#fff;background:#f44336;position:absolute;left:50%;top:-1em;text-align:center;margin-left:-4em;font-weight:bold;}
+.changebox dd{font-size:14px;padding:0.3em; margin: 0;}
+.changebox p{padding: 1em 0 0; text-align: center; color: #fff;}
+.changebox i{color:#ffd836;}
+.changebox ul{width:80%;}
+.changebox ul li{clear:both;margin:0.5em auto;height:50px; list-style: none;}
+.changebox input{width:85%;height:50px;border:0;background:#fff;padding:0 0 0 15%;display:block;outline:none;font-size:20px;color:#000;border-radius:0px;-webkit-appearance:none;}
+.changebox .phone{background:#fff url(../images/mg_phone.png) no-repeat 2% center;background-size:auto 80%;}
+.changebox .smail{float:left;padding:0;width:50%;text-align:center;}
+.enter,.send{width:100%;background:#ffa100;text-align:center;display:block;height:50px;line-height:50px;font-weight:bold;font-size:20px;color:#fff; text-decoration: none;}
+.send{width:50%;float:right;}
+.changebox b{font-size:20px;text-align:center;display:block;}
+
+.bg-bbb{ background: #bbb;}
+
+/*成功提示*/
+.suc_name{ font-size: 24px; color: #fff; text-align: center; margin: 50px auto; width: 175px; line-height: 40px; }
+.suc_name i{ display: inline-block; width: 40px; height: 40px; background: url("../images/mg_success.png"); background-size: 100%; float: left;}
+.erweima{ text-align: center;}
+.erweima img{width: 50%;}
+.hint{ text-align: center; font-size: 14px; color: #fff; margin: 30px 0;}
+
+/*排行榜*/
+.top_bg{ position:absolute; top:0;}
+.topbox{ width: 76%;  margin: 20px auto; border: solid 2px #fff; border-radius: 10px; }
+.topbox .tap_t{ height: 42px; padding: 0; margin: 0; position: relative;}
+.tap_t li{ width: 33%; list-style: none; text-align: center; color: #fff; line-height: 14px;border-bottom: solid 2px #fff; position: absolute; background: #FFA100; padding: 5px 0;  }
+.tap_t li.hover{ background: #fff; color: #ffa100;}
+.tap_t li sub{ font-size: 12px;}
+.tap_t .tap_t_l{border-top-left-radius:8px;}
+.tap_t .tap_t_r{ right: 0;border-top-right-radius:8px;}
+.tap_t .tap_t_m{ left:50%; z-index: 2; margin-left: -17%; width: 34%; border-left: solid 2px #fff; border-right: solid 2px #fff;}
+.w_50  .tap_t_r{ width: 50%;}
+.w_50 .tap_t_m{ left:0;margin-left:0; width: 50%; border-left:none; border-right: solid 2px #fff;border-top-left-radius:8px;}
+
+.tap_t .tap_t_other{ left:-34px; top:30px; width: 30px; line-height: 20px; padding: 3px 0; border:solid 2px #fff;  border-top-left-radius:10px;border-bottom-left-radius:10px; }
+.topbox .tap_i{ margin: 0; padding: 0; }
+.topbox .tap_i li{ margin: 0; color: #fff; line-height: 35px; padding:5% 0 0; list-style: none; }
+.topbox .tap_i p{ margin: 0; height: 35px; padding: 3% 8%; background: url("../images/dotline.png") no-repeat 55% 50%; background-size: 20% auto;  }
+.topbox .tap_i em{ font-style: normal; float: left; font-weight: bold; width: 30px; text-align: center;  }
+.topbox .tap_i strong{ float: right;  }
+.myrank{ border-top: solid 2px #fff; padding:10px 20px; line-height: 20px; text-align: center; overflow: hidden;}
+.tap_i .myrank .f-name{ width: 40px; height: 40px;}
+.tap_i .myrank p{ font-weight: bold;background: none;}
+.hide{ display: none;}
+.visible{ height: 320px; margin-bottom: 10px; overflow-y: scroll; }
+.no1{ background: url("../images/no1.png") no-repeat 50% 40%; color: #fff; background-size: 100% auto;}
+.no2{ background: url("../images/no2.png") no-repeat 50% 40%; color: #fff; background-size: 100% auto;}
+.no3{ background: url("../images/no3.png") no-repeat 50% 40%; color: #fff; background-size: 100% auto;}
+.prizerule{ height: 400px;}
+.prizerule img{ width: 100%;}
+
