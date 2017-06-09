@@ -34,31 +34,52 @@
         LGlobal.stageScale = LStageScaleMode.EXACT_FIT;//指定整个应用程序在指定区域中可见，但不尝试保持原始高宽比
         LSystem.screen(LStage.FULL_SCREEN);//全屏
     }
-    //定义基础数据
+
+    //定义游戏基础数据
     var w=1334,h=750;//画布宽度和高度
-    var initpage,hintpage,gamepage,endpage;//起始页、游戏说明页、游戏界面、游戏结束页
-    var goodsnum=0,goldnum=0,score=0,time=30;//商品数量、金币数量、得分、时间
+    var loadLayer,hintLayer,gameLayer,endLayer;//加载页、游戏说明页、游戏界面、游戏结束页
+    var goodsnum=0,goldnum=0,score=0,time=30,loadtxt;//商品数量、金币数量、得分、时间
     var player,goods,gold,monster;//角色、商品、金币、怪物
     var imgdata=[//图片资源
-        {name:'initbg',path:'initbg.png'},
-        {name:'player',path:'mario.png'}
+        {name:'hintbg',path:'asset/hintbg.png'},
+        {name:'start_btn',path:'asset/start_btn.png'},
+        {name:'player',path:'asset/mario.png'}
     ];
+    var imglist=[];//加载后的图片对象
 
     //初始化引擎
     init(50,"mylegend",w,h,main);
-    function main(){
-        initpage=new LSprite();
 
-        var loader = new LLoader();
-        loader.addEventListener(LEvent.COMPLETE, loadBitmapdata);
-        loader.load("asset/initbg.png", "bitmapData");
-        function loadBitmapdata(){
-            var bitmapdata = new LBitmapData(event.target);
-            var bitmap = new LBitmap(bitmapdata);
-            initpage.addChild(bitmap);
-        }
-        addChild(initpage);
+    //游戏主程序
+    function main(){
+        //加载页
+        loadLayer = new LoadingSample5();//1-7种加载动画
+        addChild(loadLayer);
+        LLoadManage.load(
+            imgdata,
+            function(progress){loadLayer.setProgress(progress);},
+            function(result){//加载完成移除加载页
+                imglist = result;
+                removeChild(loadLayer);
+                loadLayer = null;
+                //引入说明页
+                hintLayer =new LSprite;
+                addChild(hintLayer);
+                console.log(imglist);
+                var hintbg=new LBitmap(new LBitmapData(imglist["hintbg"]));
+                hintLayer.addChild(hintbg);
+                hintLayer.addEventListener(LMouseEvent.MOUSE_DOWN,function(){//点击开始游戏
+                    removeChild(hintLayer);gameStart();
+                });
+            }
+        )
     }
+
+    //游戏开始程序
+    function gameStart(){
+
+    }
+    
 }(Zepto))
     
 
