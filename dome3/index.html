@@ -14,6 +14,12 @@
         <p>请横屏浏览，谢谢！</p>
     </div>
 </div>
+<ul class="table">
+    <li>SCROE<span class="score">0</span></li>
+    <li>GOODS<span class="goods">0</span></li>
+    <li>GOLD<span class="gold">0</span></li>
+    <li>TIME<span class="time">0</span></li>
+</ul>
 
 
 <script type="text/javascript" src="asset/zepto.min.js"></script>
@@ -38,11 +44,14 @@
     //定义游戏基础数据
     var w=1334,h=750;//画布宽度和高度
     var loadLayer,hintLayer,gameLayer,endLayer;//加载页、游戏说明页、游戏界面、游戏结束页
-    var goodsnum=0,goldnum=0,score=0,time=30,loadtxt;//商品数量、金币数量、得分、时间
+    var score=0,goodsnum=0,goldnum=0,time=30,loadtxt;//得分、商品数量、金币数量、时间
+    var gamebg;//游戏背景
     var player,goods,gold,monster;//角色、商品、金币、怪物
+    var speed=10,sh=0; //游戏移动速度,跳起高度
     var imgdata=[//图片资源
         {name:'hintbg',path:'asset/hintbg.png'},
-        {name:'start_btn',path:'asset/start_btn.png'},
+        {name:'gamebg',path:'asset/gamebg.png'},
+        {name:'monster',path:'asset/gw.png'},
         {name:'player',path:'asset/mario.png'}
     ];
     var imglist=[];//加载后的图片对象
@@ -77,7 +86,59 @@
 
     //游戏开始程序
     function gameStart(){
+        $(".table").show();
+        showtxt();
+        gameLayer=new LSprite;
+        addChild(gameLayer);
+        gamebg=new LBitmap(new LBitmapData(imglist["gamebg"]));
+        gameLayer.addChild(gamebg);
 
+        addplayer();addmonster();
+        gameLayer.addEventListener(LEvent.ENTER_FRAME,onframe);//播放事件
+        gameLayer.addEventListener(LMouseEvent.MOUSE_DOWN,onDown);//点击事件
+       
+    }
+
+    function showtxt(){
+        $(".table").find(".score").text(score);
+        $(".table").find(".goods").text(goodsnum);
+        $(".table").find(".gold").text(goldnum);
+        $(".table").find(".time").text(time);
+    }
+
+    function addplayer(){//添加角色
+        var list = LGlobal.divideCoordinate(1740,116,1,15);
+        list[0].splice(3,12);
+        console.log(list);
+        var data = new LBitmapData(imglist['player'],0,0,116,116);
+        player = new LAnimation(gameLayer,data,list);
+        player.y=h-150-116;
+        player.x=100;
+    }
+    function addmonster(){//添加怪物
+        var list = LGlobal.divideCoordinate(100,74,1,2);
+        var data = new LBitmapData(imglist['monster'],0,0,50,74);
+        monster = new LAnimation(gameLayer,data,list);
+        monster.y=h-150-74;
+        monster.x=1334;
+    }
+
+
+    function onframe(){
+        if(gamebg.x<-825){gamebg.x+=825}
+        if(sh>0 && sh<20){sh++;}else{sh=0;player.onframe();}
+        gamebg.x-=speed;
+        player.y=Math.pow((sh-10),2)*2-200+h-150-116;
+        monster.x-=1.5*speed;
+        monster.onframe();
+        hitTest();
+        if(monster.x<-100){addmonster();}
+    }
+    function onDown(){if(sh===0){sh=1;}}
+
+    //碰撞检测
+    function hitTest(){
+        if(LGlobal.hitTestArc(player,monster)){ console.log('game over')}
     }
     
 }(Zepto))
