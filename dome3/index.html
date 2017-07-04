@@ -8,13 +8,7 @@
 </head>
 <body>
 <div id="mylegend"></div>
-<div class="cover">
-    <div class="center">
-        <img src="asset/iphone.png" alt=""/>
-        <p>请横屏浏览，谢谢！</p>
-    </div>
-</div>
-<ul class="table">
+<ul id="table">
     <li>SCROE<span class="score">0</span></li>
     <li>GOODS<span class="goods">0</span></li>
     <li>GOLD<span class="gold">0</span></li>
@@ -26,216 +20,252 @@
 <script type="text/javascript" src="asset/lufylegend-1.10.1.js"></script>
 <script type="text/javascript">
 (function($){
+    function rotateViem(angle){//使用css3旋转屏幕视图：竖屏调用angle传参为90；横屏调用angle传参为0
+        var canv = document.getElementById('mylegend_canvas');
+        canv.style.transformOrigin = document.documentElement.clientWidth/2+"px "+document.documentElement.clientWidth/2+"px";
+        var table = document.getElementById("table");
+        table.style.transform = 'rotate('+angle+'deg)';
+        table.style.transformOrigin = document.documentElement.clientWidth/2+"px "+document.documentElement.clientWidth/2+"px";
+        switch(angle){
+            case 90:
+                canv.style.height = document.documentElement.clientWidth+'px';
+                canv.style.width =document.documentElement.clientHeight+'px';
+                canv.style.transform = 'rotate(90deg)';
+                table.style.width=document.documentElement.clientHeight+'px';
+                break;
+            case 0:
+                canv.style.height = document.documentElement.clientHeight+'px';
+                canv.style.width =document.documentElement.clientWidth+'px';
+                canv.style.transform = 'rotate(0deg)';
+                table.style.width=document.documentElement.clientWidth+'px';
+        }
+    }
     //横竖屏判断 
     function orient() { //console.log(window.orientation);
-        if (window.orientation == 0 || window.orientation == 180) { $(".cover").show(); }
-        else if (window.orientation == 90 || window.orientation == -90) { $(".cover").hide();init(50,"mylegend",1334,750,main);}
-    };
-    orient(); 
+        if (window.orientation == 0 || window.orientation == 180) { //竖屏
+            if(document.getElementById('mylegend_canvas')){rotateViem(90)}//当canvas存在时调用（即dom已存在）
+        }else if (window.orientation == 90 || window.orientation == -90) { //横屏
+            if(document.getElementById('mylegend_canvas')){rotateViem(0)}
+        }
+    }
+    orient();
     var timer;
     $(window).bind("orientationchange", function(){clearTimeout(timer);timer = setTimeout(orient, 300);});
 
 
-    if(LGlobal.mobile){//如果是移动端
+/************************************************************************************/
+
+    //仅移动端可访问
+    if(LGlobal.mobile){
         LGlobal.stageScale = LStageScaleMode.EXACT_FIT;//指定整个应用程序在指定区域中可见，但不尝试保持原始高宽比
         LSystem.screen(LStage.FULL_SCREEN);//全屏
+        gameinit();
+    }else{
+        $("body").html('<p style="text-align:center">不支持PC端访问，请使用手机扫码访问!</p>')
     }
 
-    var game={};
-    game.options={
-        w:1334,h:750,
-    }
+
+    //游戏初始化
+    function gameinit(){
+        //定义游戏基础数据
+        var w=1334,h=750;//画布宽度和高度
+        var loadLayer,hintLayer,gameLayer,endLayer;//加载页、游戏说明页、游戏界面、游戏结束页
+        var score=0,goodsnum=0,goldnum=0,time=30,loadtxt;//得分、商品数量、金币数量、时间
+        var player,goods=[],golds=[],enemy,gamebg,tips=[],test;//角色、商品、金币、怪物、游戏背景、提示文字,测试
+        var speed=10,skip=0,press=false,pull=false; //游戏移动速度、跳起高度、被方块按下，被方块托起
+        var imgdata=[//图片资源
+            {name:'hintbg',path:'asset/hintbg.png'},
+            {name:'gamebg',path:'asset/gamebg.png'},
+            {name:'enemy',path:'asset/enemy.png'},
+            {name:'gold',path:'asset/gold.png'},
+            {name:'box',path:'asset/box.png'},
+            {name:'player',path:'asset/player.png'}
+        ];
+        var imglist=[];//存储加载后的图片数组
+
+        //初始化引擎
+        init(50,"mylegend",w,h,main);
 
 
-    //定义游戏基础数据
-    var w=1334,h=750;//画布宽度和高度
-    var loadLayer,hintLayer,gameLayer,endLayer;//加载页、游戏说明页、游戏界面、游戏结束页
-    var score=0,goodsnum=0,goldnum=0,time=30,loadtxt;//得分、商品数量、金币数量、时间
-    var player,goods=[],golds=[],enemy,gamebg,tips=[],test;//角色、商品、金币、怪物、游戏背景、提示文字,测试
-    var speed=10,skip=0,press=false,pull=false; //游戏移动速度、跳起高度、被方块按下，被方块托起
-    var imgdata=[//图片资源
-        {name:'hintbg',path:'asset/hintbg.png'},
-        {name:'gamebg',path:'asset/gamebg.png'},
-        {name:'enemy',path:'asset/enemy.png'},
-        {name:'gold',path:'asset/gold.png'},
-        {name:'box',path:'asset/box.png'},
-        {name:'player',path:'asset/player.png'}
-    ];
-    var imglist=[];//存储加载后的图片数组
+        //游戏主程序
+        function main(){
+            rotateViem(90)
+            //加载页
+            loadLayer = new LoadingSample5();//1-7种加载动画
+            addChild(loadLayer);
+            LLoadManage.load(
+                    imgdata,
+                    function(progress){loadLayer.setProgress(progress);},
+                    function(result){//加载完成移除加载页
+                        imglist = result;
+                        removeChild(loadLayer);
+                        loadLayer = null;
+                        //引入说明页
+                        hintLayer =new LSprite;
+                        addChild(hintLayer);
+                        console.log(imglist);
+                        var hintbg=new LBitmap(new LBitmapData(imglist["hintbg"]));
+                        hintLayer.addChild(hintbg);
+                        hintLayer.addEventListener(LMouseEvent.MOUSE_DOWN,function(){//点击开始游戏
+                            removeChild(hintLayer);gameStart();
+                        });
+                    }
+            )
+        }
+        /* @x @y    元件的位置
+         * @imgname 图片资源的名称
+         * @imgdata 图片截取的位置和宽高数组
+         * @slicer  图片精灵的分割规则的数组，总宽，总高，行数，列数
+         * @cut     使用splice截取分割后的数组的参数  */
+        function createAnimObj(x,y,imgname,imgdata,slicer){//添加动画元件
+            var data=new LBitmapData(imglist[imgname],imgdata[0],imgdata[1],imgdata[2],imgdata[3])
+            var list=LGlobal.divideCoordinate(slicer[0],slicer[1],slicer[2],slicer[3]);
+            var mc = new LAnimation(gameLayer,data,list);
+            mc.y=y;mc.x=x;return mc;
+        }
 
-    //初始化引擎
-    init(50,"mylegend",w,h,main);
-
-    //游戏主程序
-    function main(){
-        //加载页
-        loadLayer = new LoadingSample5();//1-7种加载动画
-        addChild(loadLayer);
-        LLoadManage.load(
-            imgdata,
-            function(progress){loadLayer.setProgress(progress);},
-            function(result){//加载完成移除加载页
-                imglist = result;
-                removeChild(loadLayer);
-                loadLayer = null;
-                //引入说明页
-                hintLayer =new LSprite;
-                addChild(hintLayer);
-                console.log(imglist);
-                var hintbg=new LBitmap(new LBitmapData(imglist["hintbg"]));
-                hintLayer.addChild(hintbg);
-                hintLayer.addEventListener(LMouseEvent.MOUSE_DOWN,function(){//点击开始游戏
-                    removeChild(hintLayer);gameStart();
-                });
+        function creategolds(){//生成初始金币元件组
+            var arrdata=[];
+            var tempy=400,tempx=250;
+            for(var i=0;i<30;i++){
+                var r1=Math.ceil(Math.random()*5);//1-5
+                var r2=Math.ceil(Math.random()*4);//1-4
+                tempy+=50*r1;
+                tempx=590-50*r2;
+                arrdata.push([tempy,tempx]);
             }
-        )
-    }
-    /* @x @y 元件的位置
-     * @imgname 图片资源的名称
-     * @imgdata 图片截取的位置和宽高数组
-     * @slicer  图片精灵的分割规则的数组，总宽，总高，行数，列数
-     * @cut     使用splice截取分割后的数组的参数
-    */
-    function createAnimObj(x,y,imgname,imgdata,slicer){//添加动画元件
-        var data=new LBitmapData(imglist[imgname],imgdata[0],imgdata[1],imgdata[2],imgdata[3])
-        var list=LGlobal.divideCoordinate(slicer[0],slicer[1],slicer[2],slicer[3]);
-        var mc = new LAnimation(gameLayer,data,list);
-        mc.y=y;mc.x=x;return mc;
-    }
-
-    function creategolds(){//生成初始金币元件组
-        var arrdata=[];
-        var tempy=400,tempx=250;
-        for(var i=0;i<30;i++){
-            var r1=Math.ceil(Math.random()*5);//1-5
-            var r2=Math.ceil(Math.random()*4);//1-4
-            tempy+=50*r1;
-            tempx=590-50*r2;
-            arrdata.push([tempy,tempx]);
+            var arr=[];
+            arrdata.forEach(function(v){
+                arr.push(new createAnimObj(v[0],v[1],'gold',[0,0,50,50],[250,50,1,5]))
+            });
+            return arr;
         }
-        var arr=[];
-        arrdata.forEach(function(v){
-            arr.push(new createAnimObj(v[0],v[1],'gold',[0,0,50,50],[250,50,1,5]))
-        });
-        return arr;
-    }
 
-    function creategoods(){//生成good元件组
-        var arrdata=[];
-        var tempy=390,tempx=250;
-        for(var i=0; i<50;i++){
-            var r1=Math.ceil(Math.random()*15);//1-15
-            tempy+=50*r1;
-            arrdata.push([tempy,tempx])
-        }
-        var arr=[];
-        arrdata.forEach(function(v){
-            var good=new createAnimObj(v[0],v[1],'box',[0,0,50,50],[200,100,2,4])
-            good.life=true;
-            arr.push(good)
-        });
-        return arr;
-    }
-
-    function createtip(color,size,x,y,text){//创建一个加分提示
-        var tip = new LTextField();
-        tip.color = color;
-        tip.size = size;
-        tip.x = x;
-        tip.y = y;
-        tip.count=0;//标记位
-        tip.text=text;
-        return tip;
-    }
-
-    //游戏开始程序
-    function gameStart(){
-        $(".table").show();
-        updateVal();
-        gameLayer=new LSprite;
-        addChild(gameLayer);
-        gamebg=new LBitmap(new LBitmapData(imglist["gamebg"]));
-        gameLayer.addChild(gamebg);
-
-        player=new createAnimObj(100,h-150-100,'player',[0,0,45,100],[360,100,1,8]);
-        enemy=new createAnimObj(1334,h-150-74,'enemy',[0,0,80,34],[240,34,1,3]);
-        goods=creategoods();
-        golds=creategolds();
-
-        gameLayer.addEventListener(LEvent.ENTER_FRAME,onframe);//播放事件
-        gameLayer.addEventListener(LMouseEvent.MOUSE_DOWN,onDown);//点击事件
-       
-    }
-
-    //更新游戏数据
-    function updateVal(a,b,c,d){
-        $(".table").find(".score").text(a);
-        $(".table").find(".goods").text(b);
-        $(".table").find(".gold").text(c);
-        $(".table").find(".time").text(d);
-    }
-
-    //游戏倒计时
-    var timer=setTimeout(function(){timeac()},1000)
-    function timeac(){if(time===0){console.log('game over');}else{time--;score+=2;timer=setTimeout(function(){timeac()},1000)}}
-
-    //系统刷屏事件
-    function onframe(){
-        //背景动画
-        if(gamebg.x<-825){gamebg.x+=825;};gamebg.x-=speed;
-
-        //角色动画
-        if(skip>0 && skip<20){
-            if(press){skip--}else{skip++} 
-            player.y=Math.pow((skip-10),2)*3-300+h-150-100;  
-        }else{
-            player.onframe();skip=0;press=false;player.y=h-150-100;
-        }
-        
-        //敌人动画        
-        enemy.onframe();
-        enemy.x-=2*speed;
-        if(enemy.x<-100){enemy=new createAnimObj(1334+Math.ceil(Math.random()*3000),h-150-74,'enemy',[0,0,80,34],[240,34,1,3]);}
-        if(LGlobal.hitTestArc(player,enemy)){ console.log('game over')};//碰到敌人的碰撞检测
-
-        //砖块动画
-        goods.forEach(function(v,k){
-            v.onframe();v.x-=speed;
-            if(v.x<-100){v.die;goods.splice(k,1);gameLayer.removeChild(v);}
-            if(LGlobal.hitTestArc(player,v)){
-                if(v.life){v.life=false;press=true;v.setAction(1,0,0,false); tips.push(createtip("#ff0",50,v.x,v.y-80,'+100'));} 
-                
+        function creategoods(){//生成good元件组
+            var arrdata=[];
+            var tempy=390,tempx=250;
+            for(var i=0; i<50;i++){
+                var r1=Math.ceil(Math.random()*15);//1-15
+                tempy+=50*r1;
+                arrdata.push([tempy,tempx])
             }
-        })
+            var arr=[];
+            arrdata.forEach(function(v){
+                var good=new createAnimObj(v[0],v[1],'box',[0,0,50,50],[200,100,2,4])
+                good.life=true;
+                arr.push(good)
+            });
+            return arr;
+        }
 
-        
+        /* @color  字体的颜色
+         * @size   字体的大小
+         * @x @y   字体的位置
+         * @text   文字的内容 */
+        function createtip(color,size,x,y,text){//创建一个加分提示
+            var tip = new LTextField();
+            tip.color = color;
+            tip.size = size;
+            tip.x = x;
+            tip.y = y;
+            tip.count=0;//标记位
+            tip.text=text;
+            return tip;
+        }
 
-        //金币元件组动画
-        golds.forEach(function(v,k){
-            v.onframe();v.x-=speed;
-            var ishit=LGlobal.hitTestArc(player,v);//获取金币的碰撞检测
-            if(ishit || v.x<-100){
-                v.die;golds.splice(k,1);//在数组中删除已获取或已遗失的金币，并在后面push一个进来
-                gameLayer.removeChild(v);
-                if(ishit){//位为碰撞添加分数显示
-                    tips.push(createtip("#fff",40,v.x,v.y-50,'+10'));
-                    goldnum++;score+=10;
+        //游戏开始程序
+        function gameStart(){
+            $("#table").show();
+            updateVal();
+            gameLayer=new LSprite;
+            addChild(gameLayer);
+            gamebg=new LBitmap(new LBitmapData(imglist["gamebg"]));
+            gameLayer.addChild(gamebg);
+
+            player=new createAnimObj(100,h-150-100,'player',[0,0,45,100],[360,100,1,8]);
+            enemy=new createAnimObj(1334,h-150-74,'enemy',[0,0,80,34],[240,34,1,3]);
+            goods=creategoods();
+            golds=creategolds();
+
+            gameLayer.addEventListener(LEvent.ENTER_FRAME,onframe);//播放事件
+            gameLayer.addEventListener(LMouseEvent.MOUSE_DOWN,onDown);//点击事件
+
+        }
+
+        //更新游戏数据
+        function updateVal(a,b,c,d){
+            $("#table").find(".score").text(a);
+            $("#table").find(".goods").text(b);
+            $("#table").find(".gold").text(c);
+            $("#table").find(".time").text(d);
+        }
+
+        //游戏倒计时
+        var timer=setTimeout(function(){timeac()},1000)
+        function timeac(){if(time===0){console.log('game over');}else{time--;score+=2;timer=setTimeout(function(){timeac()},1000)}}
+
+        //系统刷屏事件
+        function onframe(){
+            //背景动画
+            if(gamebg.x<-825){gamebg.x+=825;};gamebg.x-=speed;
+
+            //角色动画
+            if(skip>0 && skip<20){
+                if(press){skip--}else{skip++}
+                player.y=Math.pow((skip-10),2)*3-300+h-150-100;
+            }else{
+                player.onframe();skip=0;press=false;player.y=h-150-100;
+            }
+
+            //敌人动画
+            enemy.onframe();
+            enemy.x-=2*speed;
+            if(enemy.x<-100){enemy=new createAnimObj(1334+Math.ceil(Math.random()*3000),h-150-74,'enemy',[0,0,80,34],[240,34,1,3]);}
+            if(LGlobal.hitTestRect(player,enemy)){ console.log('game over')};//碰到敌人的碰撞检测
+
+            //砖块动画
+            goods.forEach(function(v,k){
+                v.onframe();v.x-=speed;
+                if(v.x<-100){v.die;goods.splice(k,1);gameLayer.removeChild(v);}
+                if(LGlobal.hitTestRect(player,v)){
+                    if(v.life){v.life=false;press=true;v.setAction(1,0,0,false); tips.push(createtip("#ff0",50,v.x,v.y-80,'+100'));}
+
                 }
-                if(golds.length<10){golds.push(new createAnimObj(1300,590-50*Math.ceil(Math.random()*4),'gold',[0,0,50,50],[250,50,1,5]))}
-            };
-        })
+            })
 
-        //提示分数
-        tips.forEach(function(v,k){
-            gameLayer.addChild(v);
-            if(v.count<10){v.count++;v.alpha=1-v.count/10; v.y-=speed;}else{tips.splice(k,1);gameLayer.removeChild(v);}
-        })
-        
 
-        //更新文本数值
-        updateVal(score,goodsnum,goldnum,time);
+
+            //金币元件组动画
+            golds.forEach(function(v,k){
+                v.onframe();v.x-=speed;
+                var ishit=LGlobal.hitTestRect(player,v);//获取金币的碰撞检测
+                if(ishit || v.x<-100){
+                    v.die;golds.splice(k,1);//在数组中删除已获取或已遗失的金币，并在后面push一个进来
+                    gameLayer.removeChild(v);
+                    if(ishit){//位为碰撞添加分数显示
+                        tips.push(createtip("#fff",40,v.x,v.y-50,'+10'));
+                        goldnum++;score+=10;
+                    }
+                    if(golds.length<10){golds.push(new createAnimObj(1300,590-50*Math.ceil(Math.random()*4),'gold',[0,0,50,50],[250,50,1,5]))}
+                };
+            })
+
+            //提示分数
+            tips.forEach(function(v,k){
+                gameLayer.addChild(v);
+                if(v.count<10){v.count++;v.alpha=1-v.count/10; v.y-=speed;}else{tips.splice(k,1);gameLayer.removeChild(v);}
+            })
+
+
+            //更新文本数值
+            updateVal(score,goodsnum,goldnum,time);
+        }
+        function onDown(){if(skip===0){skip=1;}}
     }
-    function onDown(){if(skip===0){skip=1;}}
+
+
+
+
 
     
 }(Zepto))
