@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>超级大赢家-H5小游戏</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    <link rel="stylesheet" href="asset/reset.min.css"/>
+    <link rel="stylesheet" href="asset/style.css"/>
+</head>
+<body style="transform:rotate(90deg);">
+<ul class="wrap">
+
+    <li class="page record">
+        <h2 class="title"><img src="asset/recordTitle.png" alt=""/></h2>
+        <div class="info">
+            <div class="thead">
+                <table width="100%">
+                    <tr>
+                        <th width="15%">总分</th>
+                        <th width="15%">奖项</th>
+                        <th width="25%">奖品</th>
+                        <th width="25%">时间</th>
+                        <th>操作</th>
+                    </tr>
+                </table>
+            </div>
+            <div class="tbody">
+                <table width="100%">
+                    <tr>
+                        <td width="15%">25430</td>
+                        <td width="15%">一等奖</td>
+                        <td width="25%">巧克力1盒</td>
+                        <td width="25%">05/06 17:32</td>
+                        <td><input type="button" value="查看"/><div class="hide"><img src="asset/dialog/prize01.png" alt=""/><h3 class="title">巧克力1盒</h3><p>实物奖品需要填写信息才能寄送哦！</p></div></td>
+                    </tr>
+                    <tr>
+                        <td>25430</td>
+                        <td>二等奖</td>
+                        <td>电影票1张</td>
+                        <td>05/06 17:32</td>
+                        <td><input type="button" value="查看"/><div class="hide"><img src="asset/dialog/prize02.png" alt=""/><h3 class="title">电影票1张</h3><p>兑换码：1111-3333-4444-5555</p></div></td>
+                    </tr>
+                    <tr>
+                        <td>25430</td>
+                        <td>三等奖</td>
+                        <td>抵扣券10元</td>
+                        <td>05/06 17:32</td>
+                        <td><input type="button" value="查看"/><div class="hide"><img src="asset/dialog/prize03.png" alt=""/><h3 class="title">抵扣券10元</h3><p>兑换码：1111-3333-4444-5555</p></div></td>
+                    </tr>
+                    <tr>
+                        <td>25430</td>
+                        <td>三等奖</td>
+                        <td>抵扣券10元</td>
+                        <td>05/06 17:32</td>
+                        <td><input type="button" value="查看"/><div class="hide"><img src="asset/dialog/prize03.png" alt=""/><h3 class="title">抵扣券10元</h3><p>兑换码：1111-3333-4444-5555</p></div></td>
+                    </tr>
+                    <tr>
+                        <td>25430</td>
+                        <td>三等奖</td>
+                        <td>抵扣券10元</td>
+                        <td>05/06 17:32</td>
+                        <td><input type="button" value="查看"/><div class="hide"><img src="asset/dialog/prize03.png" alt=""/><h3 class="title">抵扣券10元</h3><p>兑换码：1111-3333-4444-5555</p></div></td>
+                    </tr>
+                    <tr>
+                        <td>25430</td>
+                        <td>三等奖</td>
+                        <td>抵扣券10元</td>
+                        <td>05/06 17:32</td>
+                        <td><input type="button" value="查看"/><div class="hide"><img src="asset/dialog/prize03.png" alt=""/><h3 class="title">抵扣券10元</h3><p>兑换码：1111-3333-4444-5555</p></div></td>
+                    </tr>
+                    <tr>
+                        <td>25430</td>
+                        <td>三等奖</td>
+                        <td>抵扣券10元</td>
+                        <td>05/06 17:32</td>
+                        <td><input type="button" value="查看"/><div class="hide"><img src="asset/dialog/prize03.png" alt=""/><h3 class="title">抵扣券10元</h3><p>兑换码：1111-3333-4444-5555</p></div></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="tfoot">
+                <a class="btn_inputin" href="javascript:;"><img src="asset/btninputin.png" alt=""/></a>
+                <a class="btn_back" href="index.html"><img src="asset/btnback.png" alt=""/></a>
+            </div>
+        </div>
+    </li>
+</ul>
+<div class="btn_music">
+    <!--<audio id="musicfx" loop="loop" autoplay="autoplay">-->
+        <!--<source src="asset/bgmusic.mp3" type="audio/mpeg">-->
+    <!--</audio>-->
+</div>
+
+<script type="text/javascript" src="asset/zepto.min.js"></script>
+<script type="text/javascript">
+(function($){
+    //弹出框组件
+    var Dialog=function(data,callback){this.render(data,callback)};
+    Dialog.prototype={
+        constructor:Dialog,
+        render:function(d,fn){
+            var that=this;
+            that.body=$("body");
+            //构建DOM结构
+            that.dialogbox=$('<div class="dialog">');
+            that.dialogmain=$('<div class="d_main">');
+            that.d_head=$('<div class="d_head">');
+            that.d_body=$('<div class="d_body"></div>');
+            that.d_foot=$('<div class="d_foot"></div>');
+            //添加内容
+            that.d_head.html(d[0]);that.d_body.html(d[1]);
+            var btns='';
+            d[2].forEach(function(v){
+                btns+='<a class="'+v+'" href="javascript:;"><img src="asset/dialog/'+v+'.png" alt=""/></a>'
+            });
+            that.d_foot.html(btns);
+            that.d_foot.find(".enter").on("tap",function(){fn()});
+            that.d_foot.find("a").on("tap",function(){that.close()});
+
+            //插入DOM
+            that.dialogmain.append(that.d_head);
+            that.dialogmain.append(that.d_body);
+            that.dialogmain.append(that.d_foot);
+            that.dialogbox.append(that.dialogmain);
+            that.body.append(that.dialogbox)
+        },
+        close:function(){
+            var that=this;
+            that.dialogbox.remove()
+        }
+    };
+
+    $(".btn_inputin").on("tap",function(){
+        var d=new Dialog(['<img src="asset/dialog/head_over.png" alt=""/>','<p><input type="text" placeholder="收件人姓名"/></p><p><input type="text" placeholder="手机号码"/></p><p><input type="text" placeholder="邮寄地址"/></p>',['enter','close']],function(){
+//            $.ajax({
+//                url: "script.php",
+//                method: "POST",
+//                data: {id : ''},
+//                success:function(result){}
+//            });
+            alert("您的信息已提交服务器，如有实物奖品派送我们会尽快与您联系，请耐心等待！")
+        })
+    });
+
+    $(".tbody input").on("tap",function(){
+        var d=new Dialog(['<img src="asset/dialog/head_prize.png" alt=""/>',$(this).next(".hide").html(),['enter']],function(){})
+    })
+
+    function rotateViem(angle){//使用css3旋转屏幕视图：竖屏调用angle传参为90；横屏调用angle传参为0
+        var body = document.getElementsByTagName('body')[0];
+        body.style.transformOrigin = document.documentElement.clientWidth/2+"px "+document.documentElement.clientWidth/2+"px";
+        switch(angle){
+            case 90:
+                body.style.width=document.documentElement.clientHeight+'px';
+                body.style.height=document.documentElement.clientWidth+'px';
+                body.style.transform = 'rotate(90deg)';
+                break;
+            case 0:
+                body.style.width=document.documentElement.clientWidth+'px';
+                body.style.height=document.documentElement.clientHeight+'px';
+                body.style.transform = 'rotate(0deg)';
+        }
+    }
+
+    //横竖屏判断
+    function orient() { //console.log(window.orientation);
+        if (window.orientation == 0 || window.orientation == 180) { //竖屏
+            rotateViem(90);
+        }else if (window.orientation == 90 || window.orientation == -90) { //横屏
+            rotateViem(0)
+        }
+    }
+    orient();
+    var timer;
+    window.addEventListener("orientationchange", function(){clearTimeout(timer);timer = setTimeout(orient, 300);});
+    rotateViem(90);
+
+    /************************************************************************************/
+
+
+
+}(Zepto))
+
+
+
+</script>
+
+</body>
+</html>

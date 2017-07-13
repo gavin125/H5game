@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>超级大赢家-H5小游戏</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    <link rel="stylesheet" href="asset/reset.min.css"/>
+    <link rel="stylesheet" href="asset/style.css"/>
+</head>
+<body>
+<ul class="wrap">
+    <li class="page game">
+        <div id="mylegend"></div>
+        <ul id="table">
+            <li class="score">00000</li>
+            <li class="goods">x 0</li>
+            <li class="gold">x 0</li>
+            <li class="time">00:30</li>
+        </ul>
+    </li>
+</ul>
+<div class="btn_music">
+    <!--<audio id="musicfx" loop="loop" autoplay="autoplay">-->
+        <!--<source src="asset/bgmusic.mp3" type="audio/mpeg">-->
+    <!--</audio>-->
+</div>
+
+<script type="text/javascript" src="asset/zepto.min.js"></script>
+<script type="text/javascript" src="asset/lufylegend-1.10.1.js"></script>
+<script type="text/javascript">
+
+(function($){
+    //弹出框组件
+    var Dialog=function(data){this.render(data)};
+    Dialog.prototype={
+        constructor:Dialog,
+        render:function(d){
+            var that=this;
+            that.body=$("body");
+            that.dialogbox=$('<div class="dialog">');
+            that.dialogmain=$('<div class="dialog_main">');
+            that.closebtn=$('<i class="closebtn">');
+            that.closebtn.on('click',function(){that.close()});
+            that.d_head=$('<div class="d_head">');
+            that.d_body=$('<div class="d_body"></div>');
+            if(d.status==1){//若数据写入数据库成功，返回1
+                that.d_head.addClass("suc").html('<i></i>报名成功！')
+                that.d_body.html('感谢您报名参加我们的体验官活动，本次活动人数有限，如果您获得参会资格，我们会电话或短信通知到您。')
+            }else{
+                that.d_head.addClass("fail").html('<i></i>非常抱歉！')
+                that.d_body.html('本次活动名额有限，仅邀请米缸金融投资人参与。<br/>非常欢迎您成为米缸投资人，与我们一起感受安全便捷的投资体验。')
+            }
+            that.dialogmain.append(that.closebtn);
+            that.dialogmain.append(that.d_head);
+            that.dialogmain.append(that.d_body);
+            that.dialogbox.append(that.dialogmain);
+            that.body.append(that.dialogbox)
+        },
+        close:function(){
+            var that=this;
+            that.dialogbox.remove()
+        }
+    }
+
+    function rotateViem(angle){//使用css3旋转屏幕视图：竖屏调用angle传参为90；横屏调用angle传参为0
+        var body = document.getElementsByTagName('body')[0];
+        body.style.transformOrigin = document.documentElement.clientWidth/2+"px "+document.documentElement.clientWidth/2+"px";
+        var canv = document.getElementById('mylegend_canvas');
+        switch(angle){
+            case 90:
+                if(canv){canv.style.height = document.documentElement.clientWidth+'px';
+                    canv.style.width =document.documentElement.clientHeight+'px';}
+                body.style.width=document.documentElement.clientHeight+'px';
+                body.style.height=document.documentElement.clientWidth+'px';
+                body.style.transform = 'rotate(90deg)';
+                break;
+            case 0:
+                if(canv){canv.style.height = document.documentElement.clientHeight+'px';
+                    canv.style.width =document.documentElement.clientWidth+'px';}
+                body.style.width=document.documentElement.clientWidth+'px';
+                body.style.height=document.documentElement.clientHeight+'px';
+                body.style.transform = 'rotate(0deg)';
+        }
+    }
+
+    //横竖屏判断
+    function orient() { //console.log(window.orientation);
+        if (window.orientation == 0 || window.orientation == 180) { //竖屏
+            rotateViem(90);
+        }else if (window.orientation == 90 || window.orientation == -90) { //横屏
+            rotateViem(0)
+        }
+    }
+    orient();
+    var timer;
+    window.addEventListener("orientationchange", function(){clearTimeout(timer);timer = setTimeout(orient, 300);});
+    rotateViem(90);
+
+    /************************************************************************************/
+
+    //仅移动端可访问
+    if(LGlobal.mobile){
+        LGlobal.stageScale = LStageScaleMode.EXACT_FIT;//指定整个应用程序在指定区域中可见，但不尝试保持原始高宽比
+        LSystem.screen(LStage.FULL_SCREEN);//全屏
+
+    }else{
+        $("body").html('<p style="text-align:center">不支持PC端访问，请使用手机扫码访问!</p>')
+    }
+
+
+    /************************************************************************************/
+
+    //背景音乐控制
+    $(".btn_music").on("tap",function(){
+        if($(this).hasClass("off")){$(this).removeClass("off");$(this).find("audio").get(0).play();}else{$(this).addClass("off");$(this).find("audio").get(0).pause();}
+    });
+    /************************************************************************************/
+
+}(Zepto))
+</script>
+<script>
+    var H5Game=function(fts,id,w,h,imgarr){this.fts=fts;this.id=id;this.w=w;this.h=h;this.imgarr=imgarr;this.gameInit();};
+    H5Game.prototype={
+        construct:H5Game,
+        //初始化游戏
+        gameInit:function(){
+            var that=this;
+            that.loadLayer=null;
+            that.hintLayer=null;
+            that.gameLayer=null;
+            that.imglist=[];//经插件加载后的图片数组
+            that.speed=15;//游戏移动速度
+            that.maparr=[
+                [1,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0],
+                [0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0],
+                [0,0,0,1,1, 0,0,1,1,0, 0,0,0,0,0, 0,0,0,0,0],
+                [0,0,0,0,0, 0,0,0,0,0, 1,0,0,0,0, 0,0,0,0,0],
+                [1,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0]
+            ]
+            //执行插件初始化程序
+            init(that.fts,that.id,that.w,that.h,that.gameLoad);
+
+        },
+
+        //加载进度与游戏说明
+        gameLoad:function(that){
+            that=this.mygame;
+            that.loadLayer = new LoadingSample5();//1-7种加载动画
+            addChild(that.loadLayer);
+            that.canvas=document.getElementById(that.id+'_canvas');
+            that.body=document.getElementsByTagName('body')[0];
+            that.canvas.style.height=that.body.style.height;
+            that.canvas.style.width=that.body.style.width;
+            LLoadManage.load(that.imgarr,function(progress){that.loadLayer.setProgress(progress);},function(result){//加载完成移除加载页
+                that.imglist = result;
+                removeChild(that.loadLayer);that.loadLayer = null;
+                //引入说明页
+                that.hintLayer =new LSprite();
+                addChild(that.hintLayer);
+                that.hintLayer.addChild(new LBitmap(new LBitmapData(that.imglist["hintbg"])));
+                that.hintLayer.addEventListener(LMouseEvent.MOUSE_DOWN,function(){//点击开始游戏
+                    removeChild(that.hintLayer);that.hintLayer = null;
+                    that.gameStart();
+                });
+            })
+        },
+
+        //开始游戏
+        gameStart:function(){
+            var that=this;
+            that.gameLayer=new LSprite;
+            addChild(that.gameLayer);
+            //背景
+            that.gamebg=new LBitmap(new LBitmapData(that.imglist["gamebg"]));
+            that.gameLayer.addChild(that.gamebg);
+            //地面组件
+            that.floors=new LSprite();
+            that.createFloor(['floor1','floor2','floor3'],that.floors,20,150);
+            that.gameLayer.addChild(that.floors);
+            //道具组件
+            that.props=new LSprite();
+            that.createProp('gold',that.props,that.maparr);
+            that.gameLayer.addChild(that.props);
+            //角色
+            that.player=that.createAnimObj(150,that.h-120-97,'player',[0,0,54,120],[432,240,2,8]);
+            //计分表
+            document.getElementById("table").style.display="block";
+
+            that.gameLayer.addEventListener(LEvent.ENTER_FRAME,that.gemeOnframe);//播放事件
+            that.gameLayer.addEventListener(LMouseEvent.MOUSE_DOWN,that.gameOnDown);//点击事件
+        },
+
+        //游戏动画帧事件
+        gemeOnframe:function(){
+            var that=window.mygame;
+            //背景动画
+            if(that.gamebg.x<-1334){that.gamebg.x+=1334;}
+            that.gamebg.x-=that.speed/5;
+
+            //角色动画
+            if(that.skip>0 && that.skip<20){
+                that.skip++;
+                that.player.y=Math.pow((that.skip-10),2)*3-300+that.h-120-97;
+            }else{
+                that.player.onframe();that.skip=0;that.player.y=that.h-120-97;
+            }
+
+            //地面动画
+            that.floors.x-=that.speed;
+        },
+
+        //游戏按下事件
+        gameOnDown:function(){
+            var that=window.mygame;
+            if(that.skip===0){that.skip=1;}
+        },
+
+        //创建逐帧动画元件
+        /* @x @y    元件的位置
+         * @imgname 图片资源的名称
+         * @imgdata 图片截取的位置和宽高数组
+         * @slicer  图片精灵的分割规则的数组，总宽，总高，行数，列数 */
+        createAnimObj:function(x,y,imgname,imgdata,slicer){
+            var that=this;
+            var data=new LBitmapData(that.imglist[imgname],imgdata[0],imgdata[1],imgdata[2],imgdata[3]);
+            var list=LGlobal.divideCoordinate(slicer[0],slicer[1],slicer[2],slicer[3]);
+            var mc = new LAnimation(that.gameLayer,data,list);
+            mc.y=y;mc.x=x;return mc;
+        },
+
+        //生成地面组件
+        /* @imgarr 图片资源的名称数组
+         * @parent 父容器Lsprite
+         * @num    重复次数
+         * @s      间隔距离 */
+        createFloor:function(imgarr,parent,num,s){
+            var that=this;
+            parent.childs=[];
+            var y=that.h-97;
+            for(var i=0;i<num;i++){
+                if(i===0){
+                    parent.childs[i]=new LBitmap(new LBitmapData(that.imglist[imgarr[2]]));
+                    parent.childs[i].x=-20;
+                }else{
+                    parent.childs[i]=new LBitmap(new LBitmapData(that.imglist[imgarr[Math.floor(Math.random()*3)]]));
+                    parent.childs[i].x= parent.childs[i-1].x+parent.childs[i-1].bitmapData.width+s;
+                }
+                parent.childs[i].y=y;
+                parent.addChild(parent.childs[i]);
+            }
+            console.log(parent.childs[19].x);
+        },
+
+        //生成道具组件
+        createProp:function(img,parent,map){
+            var that=this;
+            parent.childs=[];
+            map.forEach(function(arr,h){
+                arr.forEach(function(v,k){
+                switch(v){
+                    case 1:
+                    console.log(h+','+k);
+                    var temp=that.createAnimObj(150,that.h-120-97,'gold',[0,0,48,54],[384,54,1,8]);
+                    temp.x=80*k+16;
+                    temp.y=240+80*h+13;
+                    parent.childs.push(temp)
+                }
+                })
+            })
+        }
+
+    }
+
+    var imgdata=[//图片资源
+        {name:'hintbg',path:'asset/game/hintbg.png'},
+        {name:'gamebg',path:'asset/game/gamebg.jpg'},
+        {name:'floor1',path:'asset/game/floor1.png'},
+        {name:'floor2',path:'asset/game/floor2.png'},
+        {name:'floor3',path:'asset/game/floor3.png'},
+        {name:'gold',path:'asset/game/gold.png'},
+        {name:'player',path:'asset/game/player.png'}
+    ];
+
+    var mygame = new H5Game(50,'mylegend',1334,750,imgdata);
+</script>
+</body>
+</html>

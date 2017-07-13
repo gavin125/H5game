@@ -5358,7 +5358,7 @@ var LTextField = (function () {
 				}
 				return s.height;
 			}
-			c.font = s.weight + " " + s.size + "px " + s.font; 
+			c.font = s.weight + " " + s.size + "px " + s.font;
 			l = c.measureText("O").width * 1.2;
 			if (s.heightMode == LTextField.HEIGHT_MODE_BASELINE) {
 				l = l * 1.2;

@@ -1,5 +1,46 @@
 @charset "utf-8";
-html,body{ padding: 0; margin: 0; position: relative;}
+html {font-size: 10px;}
+@media (min-width: 350px){ html{font-size:12px;} }
+@media (min-width: 400px){ html{font-size:14px;} }
+body{ position: relative;}
+.wrap{ width: 100%; margin: 0; padding: 0;}
+.wrap .page{ position: absolute;  width: 100%; height: 100%;}
+.page img{ width: 100%;}
+.btn_music{ position: absolute; bottom:0; left: 0; padding: 3%; margin: 3%; background: url("btnmusic.png"); background-size: 200% 100%;}
+.btn_music.off{ background-position: right;}
+
+.wrap .load{ background: url("loading.gif") center no-repeat #fff;}
+/*index*/
+.wrap .index{ background: url("indexbg.jpg"); background-size: 100% 100%; }
+.index .slogan{ position: absolute; top:10%; left: 20%; width: 60%;}
+.index .btn_rule{ position: absolute; top:0; right: 3%; width: 15%; }
+.index .btn_start{ position: absolute; top:63%; left: 40%; width: 20%; }
+.index .btn_record{ position: absolute; top:76%;left: 40%; width: 20%; }
+
+/*rule*/
+.wrap .rule{  background: url("rulebg.jpg"); background-size: 100% 100%; }
+.wrap .title{ position: absolute; top:6%; left: 42%; width: 16%; }
+.rule .info{ position: absolute; top:26%; left: 20%; width: 60%; color: #950; font-size: 1.1rem; text-align: center }
+.rule .info th{ color: #d00; font-weight: normal; }
+.rule .info td{ text-align: left; }
+.rule .info small{ display: block; background: #fff; color:#ccc; padding: 3px; text-align: center; margin: 2% 0; }
+.rule .btn_back{ display: inline-block; width: 30%;  }
+
+/*record*/
+.wrap .record{ display:block; background: url("rulebg.jpg"); background-size: 100% 100%; }
+.record .info{ position: absolute; top:26%; left: 20%; width: 60%; font-size: 1.1rem; text-align: center; }
+.record .thead{ background: #d00;color: #fff; margin-bottom: 3px; }
+.record .tbody{ height: 150px; overflow-y: auto; color: #950; font-size: 1.1rem; }
+.record .tbody tr:nth-child(odd){ background: #edc9b3;}
+.record .tbody td{ padding: 5px 0;}
+.record .tbody input{ border: none; background: url("check.png"); background-size: 100% 100%; width: 40px; height: 20px; color: #fff; }
+.record .tbody .hide{ display: none; }
+.record .tfoot{ text-align: center; margin-top: 5px; }
+.record .tfoot a{ display: inline-block; width:30%; margin: 0 5%; }
+
+
+/*game*/
+#mylegend{ position: relative; height: 100%; }
 #mylegend canvas{ background: #fff;}
 .cover{ position: fixed; top:0; left: 0; width: 100%; height: 100%; display: none; }
 .cover .center{ height:100%; background: #ccc; text-align: center; padding-top: 20%; }
@@ -16,6 +57,27 @@ html,body{ padding: 0; margin: 0; position: relative;}
      90%{ transform:rotate(0deg);}
  }
 
- .table{ position: fixed; top:0; left: 0; width: 100%; height: 50px; color: #fff; list-style: none; margin: 0; padding: 0; overflow: hidden; display: none;}
- .table li{ width: 25%; float: left; text-align: center; padding: 2% 0 0;}
- .table li span{ display: block;}
+#table{ position: fixed; top:0; left:0; width: 100%; height: 50px; color: #fff; list-style: none; margin: 0; padding: 0; overflow: hidden; display: none;}
+#table li{ width: 25%; float: left; margin-top:4%; text-align: left;font-size: 1.5rem; text-indent: 3rem;  }
+#table .score{ background: url("game/num_score.png") center no-repeat;background-size: 90%; text-indent: 2rem;  }
+#table .goods{ background: url("game/num_goods.png") center no-repeat;background-size: 90%; }
+#table .gold{ background: url("game/num_gold.png") center no-repeat; background-size: 90%; }
+#table .time{ background: url("game/num_time.png") center no-repeat; background-size: 90%; }
+
+
+
+/*dialog*/
+.dialog{ position: fixed;top:0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7);z-index:99; }
+.dialog .d_main{ background: url("dialog/boxbg.png"); width: 280px; height: 240px; position: fixed; top:50%; left: 50%; margin-left: -140px; margin-top: -110px;  text-align: center; -webkit-animation:dialog .3s;animation:dialog .3s; }
+@-webkit-keyframes dialog{
+    0%{ -webkit-transform:scale(0.6,0.6);transform:scale(0.6,0.6); opacity: 0}
+    100%{ -webkit-transform:scale(1,1);transform:scale(1,1); opacity: 1}
+}@keyframes dialog{
+     0%{ -webkit-transform:scale(0.6,0.6);transform:scale(0.6,0.6); opacity: 0}
+     100%{ -webkit-transform:scale(1,1);transform:scale(1,1); opacity: 1}
+ }
+.dialog .d_head{ margin-top: -30px;}
+.dialog .d_body{ margin:10px 30px; color: #630; }
+.dialog .d_body input[type='text']{ width: 208px; padding: 5px; border:none; border-radius: 2px; background: #fff; font-size: 14px; margin-bottom: 10px; }
+.dialog .d_body .title{ font-size: 16px; font-weight: bold; }
+.dialog .d_foot a{ display: inline-block; margin: 0 3%;}

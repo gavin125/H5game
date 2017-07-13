@@ -10,11 +10,27 @@
 <body style="transform:rotate(90deg);">
 <ul class="wrap">
 
-    <li class="page index">
-        <h2 class="slogan"><img src="asset/slogan.png" alt=""/></h2>
-        <a class="btn_rule" href="rule.html"><img src="asset/btnrule.png" alt=""/></a>
-        <a class="btn_start" href="game.html"><img src="asset/btnstart.png" alt=""/></a>
-        <a class="btn_record" href="record.html"><img src="asset/btnrecord.png" alt=""/></a>
+    <li class="page rule">
+        <h2 class="title"><img src="asset/ruleTitle.png" alt=""/></h2>
+        <div class="info">
+            <table width="100%">
+                <tr>
+                    <th width="20%">活动时间：</th>
+                    <td>2017年8月1日-2017年12月31日</td>
+                </tr>
+                <tr>
+                    <th valign="top">活动规则：</th>
+                    <td>1、活动期间用户购买产品，并扫描包装上的二维码获得游戏机会<br/>
+                        2、每个产品的二维码仅在第一次使用时有效<br/>
+                        3、奖品分为实物和虚拟两种，实物奖品需填写联系信息，过期不填
+                        视为自动放弃，虚拟奖品提供兑换码，请前往相关平台自行兑换
+                    </td>
+                </tr>
+            </table>
+            <small>*本活动最终解释权归本公司所有</small>
+            <a class="btn_back" href="index.html"><img src="asset/btnback.png" alt=""/></a>
+        </div>
+
     </li>
 </ul>
 <div class="btn_music">
@@ -27,37 +43,6 @@
 
 <script type="text/javascript">
 (function($){
-    //弹出框组件
-    var Dialog=function(data){this.render(data)};
-    Dialog.prototype={
-        constructor:Dialog,
-        render:function(d){
-            var that=this;
-            that.body=$("body");
-            that.dialogbox=$('<div class="dialog">');
-            that.dialogmain=$('<div class="dialog_main">');
-            that.closebtn=$('<i class="closebtn">');
-            that.closebtn.on('click',function(){that.close()});
-            that.d_head=$('<div class="d_head">');
-            that.d_body=$('<div class="d_body"></div>');
-            if(d.status==1){//若数据写入数据库成功，返回1
-                that.d_head.addClass("suc").html('<i></i>报名成功！')
-                that.d_body.html('感谢您报名参加我们的体验官活动，本次活动人数有限，如果您获得参会资格，我们会电话或短信通知到您。')
-            }else{
-                that.d_head.addClass("fail").html('<i></i>非常抱歉！')
-                that.d_body.html('本次活动名额有限，仅邀请米缸金融投资人参与。<br/>非常欢迎您成为米缸投资人，与我们一起感受安全便捷的投资体验。')
-            }
-            that.dialogmain.append(that.closebtn);
-            that.dialogmain.append(that.d_head);
-            that.dialogmain.append(that.d_body);
-            that.dialogbox.append(that.dialogmain);
-            that.body.append(that.dialogbox)
-        },
-        close:function(){
-            var that=this;
-            that.dialogbox.remove()
-        }
-    }
 
     function rotateViem(angle){//使用css3旋转屏幕视图：竖屏调用angle传参为90；横屏调用angle传参为0
         var body = document.getElementsByTagName('body')[0];
