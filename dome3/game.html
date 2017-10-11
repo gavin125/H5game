@@ -12,10 +12,10 @@
     <li class="page game">
         <div id="mylegend"></div>
         <ul id="table">
-            <li class="score">00000</li>
+            <li class="score">0</li>
             <li class="goods">x 0</li>
             <li class="gold">x 0</li>
-            <li class="time">00:30</li>
+            <li class="time">0</li>
         </ul>
     </li>
 </ul>
@@ -31,28 +31,32 @@
 
 (function($){
     //弹出框组件
-    var Dialog=function(data){this.render(data)};
+    var Dialog=function(data,callback){this.render(data,callback)};
     Dialog.prototype={
         constructor:Dialog,
-        render:function(d){
+        render:function(d,fn){
             var that=this;
             that.body=$("body");
+            //构建DOM结构
             that.dialogbox=$('<div class="dialog">');
-            that.dialogmain=$('<div class="dialog_main">');
-            that.closebtn=$('<i class="closebtn">');
-            that.closebtn.on('click',function(){that.close()});
+            that.dialogmain=$('<div class="d_main">');
             that.d_head=$('<div class="d_head">');
             that.d_body=$('<div class="d_body"></div>');
-            if(d.status==1){//若数据写入数据库成功，返回1
-                that.d_head.addClass("suc").html('<i></i>报名成功！')
-                that.d_body.html('感谢您报名参加我们的体验官活动，本次活动人数有限，如果您获得参会资格，我们会电话或短信通知到您。')
-            }else{
-                that.d_head.addClass("fail").html('<i></i>非常抱歉！')
-                that.d_body.html('本次活动名额有限，仅邀请米缸金融投资人参与。<br/>非常欢迎您成为米缸投资人，与我们一起感受安全便捷的投资体验。')
-            }
-            that.dialogmain.append(that.closebtn);
+            that.d_foot=$('<div class="d_foot"></div>');
+            //添加内容
+            that.d_head.html(d[0]);that.d_body.html(d[1]);
+            var btns='';
+            d[2].forEach(function(v){
+                btns+='<a class="'+v+'" href="javascript:;"><img src="asset/dialog/'+v+'.png" alt=""/></a>'
+            });
+            that.d_foot.html(btns);
+            that.d_foot.find(".enter").on("tap",function(){fn()});
+            that.d_foot.find("a").on("tap",function(){that.close()});
+
+            //插入DOM
             that.dialogmain.append(that.d_head);
             that.dialogmain.append(that.d_body);
+            that.dialogmain.append(that.d_foot);
             that.dialogbox.append(that.dialogmain);
             that.body.append(that.dialogbox)
         },
@@ -60,7 +64,7 @@
             var that=this;
             that.dialogbox.remove()
         }
-    }
+    };
 
     function rotateViem(angle){//使用css3旋转屏幕视图：竖屏调用angle传参为90；横屏调用angle传参为0
         var body = document.getElementsByTagName('body')[0];
@@ -116,9 +120,6 @@
     });
     /************************************************************************************/
 
-}(Zepto))
-</script>
-<script>
     var H5Game=function(fts,id,w,h,imgarr){this.fts=fts;this.id=id;this.w=w;this.h=h;this.imgarr=imgarr;this.gameInit();};
     H5Game.prototype={
         construct:H5Game,
@@ -130,12 +131,15 @@
             that.gameLayer=null;
             that.imglist=[];//经插件加载后的图片数组
             that.speed=15;//游戏移动速度
+            that.tables=[0,0,0,30];//游戏得分等数据表
+
             that.maparr=[
-                [1,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0],
-                [0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0],
-                [0,0,0,1,1, 0,0,1,1,0, 0,0,0,0,0, 0,0,0,0,0],
-                [0,0,0,0,0, 0,0,0,0,0, 1,0,0,0,0, 0,0,0,0,0],
-                [1,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0]
+                [0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,2,0,0,0,0, 0,0,2,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,1,0,0,0,0],
+                [0,0,0,1,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,1,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,1,0,0,0],
+                [0,0,1,0,1,0,0,0,0,0, 0,1,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,2,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,1,0,0],
+                [0,1,0,0,0,1,0,0,0,0, 0,0,0,0,0,0,0,0,1,1, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,1,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,1, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,1,0],
+                [1,0,0,0,0,0,1,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,1,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,1, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,1,0]
+
             ]
             //执行插件初始化程序
             init(that.fts,that.id,that.w,that.h,that.gameLoad);
@@ -144,7 +148,7 @@
 
         //加载进度与游戏说明
         gameLoad:function(that){
-            that=this.mygame;
+            that=mygame;
             that.loadLayer = new LoadingSample5();//1-7种加载动画
             addChild(that.loadLayer);
             that.canvas=document.getElementById(that.id+'_canvas');
@@ -168,19 +172,18 @@
         //开始游戏
         gameStart:function(){
             var that=this;
+            that.setTime(that.tables[3]);
             that.gameLayer=new LSprite;
             addChild(that.gameLayer);
             //背景
             that.gamebg=new LBitmap(new LBitmapData(that.imglist["gamebg"]));
             that.gameLayer.addChild(that.gamebg);
             //地面组件
-            that.floors=new LSprite();
-            that.createFloor(['floor1','floor2','floor3'],that.floors,20,150);
-            that.gameLayer.addChild(that.floors);
+            that.createFloor(['floor1','floor2','floor3'],that.gameLayer,20,150);
+
             //道具组件
-            that.props=new LSprite();
-            that.createProp('gold',that.props,that.maparr);
-            that.gameLayer.addChild(that.props);
+            that.createProp('gold',that.gameLayer,that.maparr);
+
             //角色
             that.player=that.createAnimObj(150,that.h-120-97,'player',[0,0,54,120],[432,240,2,8]);
             //计分表
@@ -192,26 +195,48 @@
 
         //游戏动画帧事件
         gemeOnframe:function(){
-            var that=window.mygame;
+            var that=mygame;
             //背景动画
             if(that.gamebg.x<-1334){that.gamebg.x+=1334;}
             that.gamebg.x-=that.speed/5;
 
             //角色动画
+            that.player.onframe();
+
             if(that.skip>0 && that.skip<20){
                 that.skip++;
-                that.player.y=Math.pow((that.skip-10),2)*3-300+that.h-120-97;
+                that.player.y=Math.pow((that.skip-10),2)*3-300+that.h-(120+95);
+                that.player.setAction(1,0,0);
             }else{
-                that.player.onframe();that.skip=0;that.player.y=that.h-120-97;
+                if(that.skip!=0){that.skip=0;that.player.setAction(0,0,1);}
             }
 
+
+            //道具动画
+            that.gameLayer.props.forEach(function(v,k){
+                v.x-=that.speed;v.onframe();
+                if(v.hitTestObject(that.player)){//获取金币的碰撞检测
+                    v.die();that.gameLayer.props.splice(k,1);that.gameLayer.removeChild(v);
+                    switch (v.id){
+                        case 1:that.tables[2]+=1;that.tables[0]+=10;that.updateTables();break;
+                        case 2:that.tables[1]+=1;that.tables[0]+=50;that.updateTables();break;
+                    }
+
+                }
+            });
+
             //地面动画
-            that.floors.x-=that.speed;
+            that.isfoot=false;
+            that.gameLayer.floors.forEach(function(v){
+                v.x-=that.speed;
+                if(LGlobal.hitTestRect(v,that.player)){that.isfoot=true}
+            })
+            if(!that.isfoot && that.skip===0){that.gameEnd('摔死了')}
         },
 
         //游戏按下事件
         gameOnDown:function(){
-            var that=window.mygame;
+            var that=mygame;
             if(that.skip===0){that.skip=1;}
         },
 
@@ -235,53 +260,89 @@
          * @s      间隔距离 */
         createFloor:function(imgarr,parent,num,s){
             var that=this;
-            parent.childs=[];
+            parent.floors=[];
             var y=that.h-97;
             for(var i=0;i<num;i++){
                 if(i===0){
-                    parent.childs[i]=new LBitmap(new LBitmapData(that.imglist[imgarr[2]]));
-                    parent.childs[i].x=-20;
+                    parent.floors[i]=new LBitmap(new LBitmapData(that.imglist[imgarr[2]]));
+                    parent.floors[i].x=-20;
                 }else{
-                    parent.childs[i]=new LBitmap(new LBitmapData(that.imglist[imgarr[Math.floor(Math.random()*3)]]));
-                    parent.childs[i].x= parent.childs[i-1].x+parent.childs[i-1].bitmapData.width+s;
+                    parent.floors[i]=new LBitmap(new LBitmapData(that.imglist[imgarr[Math.floor(Math.random()*3)]]));
+                    parent.floors[i].x= parent.floors[i-1].x+parent.floors[i-1].bitmapData.width+s;
                 }
-                parent.childs[i].y=y;
-                parent.addChild(parent.childs[i]);
+                parent.floors[i].y=y;
+                parent.addChild(parent.floors[i]);
             }
-            console.log(parent.childs[19].x);
+            console.log(parent.floors[19].x);
         },
 
         //生成道具组件
         createProp:function(img,parent,map){
             var that=this;
-            parent.childs=[];
+            parent.props=[];
+            var temp=null;
             map.forEach(function(arr,h){
-                arr.forEach(function(v,k){
-                switch(v){
-                    case 1:
-                    console.log(h+','+k);
-                    var temp=that.createAnimObj(150,that.h-120-97,'gold',[0,0,48,54],[384,54,1,8]);
-                    temp.x=80*k+16;
-                    temp.y=240+80*h+13;
-                    parent.childs.push(temp)
-                }
+                arr.forEach(function(v,k){k+=10;
+                    switch(v){
+                        case 1://金币
+                            temp=that.createAnimObj(80*k+16,200+85*h+13,'gold',[0,0,48,54],[384,54,1,8]);
+                            temp.id=v;parent.props.push(temp);break;
+                        case 2://巧克力
+                            temp=that.createAnimObj(80*k+16,200+85*h+13,'goods',[0,0,48,54],[240,54,1,5]);
+                            temp.id=v;parent.props.push(temp);break;
+                    }
                 })
             })
+        },
+
+        //游戏倒计时
+        setTime:function(t){
+            var that=this;
+            var domval=document.getElementById("table").getElementsByTagName("li")[3];
+            if(t>=0){domval.innerHTML="00:"+((t<10)?"0"+t:t);setTimeout(function(){that.setTime(--t)},1000)}else{that.gameEnd('时间到')}
+        },
+
+        //更新游戏数据
+        updateTables:function(){
+            var that=this;
+            document.getElementById("table").getElementsByTagName("li")[0].innerHTML=that.tables[0];
+            document.getElementById("table").getElementsByTagName("li")[1].innerHTML="x "+that.tables[1];
+            document.getElementById("table").getElementsByTagName("li")[2].innerHTML="x "+that.tables[2];
+        },
+
+        //游戏结束
+        gameEnd:function(){
+            var that=this;
+            removeChild(that.gameLayer);that.gameLayer=null;
+            var htmlstr="";
+            if(that.tables[0]>=2000){
+                htmlstr='<img src="asset/dialog/prize01.png" alt=""/><h3 class="title">一等奖 巧克力1盒</h3><p>本次成绩'+that.tables[0]+'分，打败了95%的玩家</p>'
+            }else if(that.tables[0]>=1000){
+                htmlstr='<img src="asset/dialog/prize02.png" alt=""/><h3 class="title">二等奖 电影票1张</h3><p>本次成绩'+that.tables[0]+'分，打败了75%的玩家</p>'
+            }else{
+                htmlstr='<img src="asset/dialog/prize03.png" alt=""/><h3 class="title">三等奖 抵扣券10元</h3><p>本次成绩'+that.tables[0]+'分，打败了30%的玩家</p>'
+            }
+            var d=new Dialog(['<img src="asset/dialog/head_over.png" alt=""/>',htmlstr,['check','back']],function(){})
         }
 
     }
 
-    var imgdata=[//图片资源
+
+    var mygame = new H5Game(50,'mylegend',1334,750,[//图片资源
         {name:'hintbg',path:'asset/game/hintbg.png'},
         {name:'gamebg',path:'asset/game/gamebg.jpg'},
         {name:'floor1',path:'asset/game/floor1.png'},
         {name:'floor2',path:'asset/game/floor2.png'},
         {name:'floor3',path:'asset/game/floor3.png'},
         {name:'gold',path:'asset/game/gold.png'},
+        {name:'goods',path:'asset/game/goods.png'},
         {name:'player',path:'asset/game/player.png'}
-    ];
+    ]);
 
-    var mygame = new H5Game(50,'mylegend',1334,750,imgdata);
+}(Zepto))
+</script>
+<script>
+
 </script>
 </body>
 </html>

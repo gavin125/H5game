@@ -28,28 +28,32 @@
 <script type="text/javascript">
 (function($){
     //弹出框组件
-    var Dialog=function(data){this.render(data)};
+    var Dialog=function(data,callback){this.render(data,callback)};
     Dialog.prototype={
         constructor:Dialog,
-        render:function(d){
+        render:function(d,fn){
             var that=this;
             that.body=$("body");
+            //构建DOM结构
             that.dialogbox=$('<div class="dialog">');
-            that.dialogmain=$('<div class="dialog_main">');
-            that.closebtn=$('<i class="closebtn">');
-            that.closebtn.on('click',function(){that.close()});
+            that.dialogmain=$('<div class="d_main">');
             that.d_head=$('<div class="d_head">');
             that.d_body=$('<div class="d_body"></div>');
-            if(d.status==1){//若数据写入数据库成功，返回1
-                that.d_head.addClass("suc").html('<i></i>报名成功！')
-                that.d_body.html('感谢您报名参加我们的体验官活动，本次活动人数有限，如果您获得参会资格，我们会电话或短信通知到您。')
-            }else{
-                that.d_head.addClass("fail").html('<i></i>非常抱歉！')
-                that.d_body.html('本次活动名额有限，仅邀请米缸金融投资人参与。<br/>非常欢迎您成为米缸投资人，与我们一起感受安全便捷的投资体验。')
-            }
-            that.dialogmain.append(that.closebtn);
+            that.d_foot=$('<div class="d_foot"></div>');
+            //添加内容
+            that.d_head.html(d[0]);that.d_body.html(d[1]);
+            var btns='';
+            d[2].forEach(function(v){
+                btns+='<a class="'+v+'" href="javascript:;"><img src="asset/dialog/'+v+'.png" alt=""/></a>'
+            });
+            that.d_foot.html(btns);
+            that.d_foot.find(".enter").on("tap",function(){fn()});
+            that.d_foot.find("a").on("tap",function(){that.close()});
+
+            //插入DOM
             that.dialogmain.append(that.d_head);
             that.dialogmain.append(that.d_body);
+            that.dialogmain.append(that.d_foot);
             that.dialogbox.append(that.dialogmain);
             that.body.append(that.dialogbox)
         },
@@ -57,7 +61,7 @@
             var that=this;
             that.dialogbox.remove()
         }
-    }
+    };
 
     function rotateViem(angle){//使用css3旋转屏幕视图：竖屏调用angle传参为90；横屏调用angle传参为0
         var body = document.getElementsByTagName('body')[0];
